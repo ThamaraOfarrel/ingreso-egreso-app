@@ -1,7 +1,13 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { IngresoEgreso } from '../models/ingreso-egreso.model';
 import { IngresoEgresoService } from '../services/ingreso-egreso.service';
+import Swal from 'sweetalert2';
+
+import { Store } from '@ngrx/store';
+import { AppState } from '../app.reducer';
+import * as ui from '../shared/ui.actions'
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-ingreso-egreso',
@@ -9,17 +15,27 @@ import { IngresoEgresoService } from '../services/ingreso-egreso.service';
   styles: [
   ]
 })
-export class IngresoEgresoComponent implements OnInit {
+export class IngresoEgresoComponent implements OnInit, OnDestroy {
 
   ingresoForm !: FormGroup ;
-  tipo : string = 'ingreso';
+  tipo         : string      = 'ingreso';
+  cargando     : boolean     = false;
+  loadingSubs !: Subscription;
 
   constructor( 
                 private fb: FormBuilder,
-                private ingresoEgresoService : IngresoEgresoService
+                private ingresoEgresoService : IngresoEgresoService,
+                private store: Store<AppState>
               ) { }
 
+  ngOnDestroy(): void {
+    this.loadingSubs.unsubscribe();
+  }
+
   ngOnInit(): void {
+    this.loadingSubs = this.store.select('ui')
+      .subscribe( ({isLoading}) => this.cargando = isLoading );
+
     this.ingresoForm = this.fb.group({
       descripcion : ['', Validators.required],
       monto :       ['', Validators.required]
@@ -28,7 +44,11 @@ export class IngresoEgresoComponent implements OnInit {
 
   guardar(){
 
+      
+
     if(this.ingresoForm.invalid){ return ; }
+
+    this.store.dispatch( ui.isLoading());
 
     console.log(this.ingresoForm.value);
     console.log(this.tipo);
@@ -37,12 +57,15 @@ export class IngresoEgresoComponent implements OnInit {
 
     const ingresoEgreso = new IngresoEgreso( descripcion, monto, this.tipo) ;
     this.ingresoEgresoService.crearIngresoEgreso(ingresoEgreso)
-    .then( ref => 
-      console.log('exto! ',ref)     
-    )
-    .catch(err => 
-      console.warn(err)
-    )
+    .then( () => {
+      this.ingresoForm.reset();
+      this.store.dispatch( ui.stopLoading());
+      Swal.fire('Registro creado', descripcion, 'success')     
+    })
+    .catch(err => {
+      this.store.dispatch( ui.stopLoading());
+      Swal.fire('Error', err.message, 'error');    
+    })
   }
 
 }
