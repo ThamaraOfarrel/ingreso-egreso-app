@@ -1,13 +1,17 @@
 
 export class Usuario {
-    
-    static fromFirebase( firestoreUser: any ) { //Toco sin desestructuracion
-        return new Usuario(firestoreUser.nameuid, firestoreUser.nombre, firestoreUser.email)
+
+    static fromFirebase0( {uid, nombre, email}:Usuario ) {
+        return new Usuario(uid, nombre, email)
     }
-    
 
+    static fromFirebase( nameuid: string, nombre:string, email:string ) {
+        const uid =  nameuid ;
+        console.log('uid',uid)
+        return new Usuario(uid, nombre, email)
+    }
 
-    constructor(
+      constructor(
         public uid: string,
         public nombre: string, 
         public email: string

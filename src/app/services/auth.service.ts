@@ -25,17 +25,31 @@ export class AuthService {
 
   initAuthListener() {
     this.auth.authState.subscribe( fuser => {
-      if(fuser){
-        this.userSubsccription = this.firestore.doc(`${ fuser.uid }/usuario`).valueChanges()
-          .subscribe( (firestoreUser) => {      
-            const user = Usuario.fromFirebase( firestoreUser )  
-            this.store.dispatch( authActions.setUser({user: user}) ) 
-          });
+      console.log('fuser ',fuser);
+      console.log('fuser ',fuser?.uid);
+      console.log('fuser ',fuser?.email);
+      if( fuser ){
+        console.log(`${fuser.uid}/usuario`);
+        this.userSubsccription = this.firestore.doc(`${fuser.uid}/usuario`).valueChanges()
+          .subscribe( (firestoreUser: any) =>{
+            console.log('firestoreUser',firestoreUser);
+            //const tempUser = new Usuario('a','b','c@c.com')
+            //this.store.dispatch( authActions.setUser( {user: tempUser} ));
+            
+            //console.log(firestoreUser.nameuid,firestoreUser.nombre,firestoreUser.email);            
+            const user = Usuario.fromFirebase(firestoreUser.nameuid,firestoreUser.nombre,firestoreUser.email)
+            console.log('user ',user)
+            this.store.dispatch( authActions.setUser( {user} ));
+            
+          })
       } else {
-        this.userSubsccription.unsubscribe();
-        this.store.dispatch( authActions.unSetUser() );
+        console.log('else');
+        //this.userSubsccription.unsubscribe(); // CUIDADOOOO
+        this.store.dispatch( authActions.unSetUser());        
       }
-    });
+      
+      
+    })
   }
 
   crearUsuario( nombre:string, email:string, password:string ){
