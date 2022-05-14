@@ -22,4 +22,9 @@ export class IngresoEgresoService {
       .collection('items')
       .add({...ingresoEgreso}) // esto hace referencia al documento
   }
+
+  initIngresosEgresosListener( uid: string = '' ) {
+    this.firestore.collection(`${uid}/ingresos-egresos/items`).valueChanges() // el valueChanges()  es lo que retorna un observable 
+      .subscribe( algo => console.log(algo) );
+  }
 }
