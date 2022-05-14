@@ -16,6 +16,11 @@ import { Usuario } from '../models/usuario.model';
 export class AuthService {
 
   userSubsccription!: Subscription;
+  _user!: Usuario;
+
+  get user(): Usuario {
+    return this._user;
+  }
 
   constructor( 
                 public auth: AngularFireAuth,
@@ -38,12 +43,15 @@ export class AuthService {
             
             //console.log(firestoreUser.nameuid,firestoreUser.nombre,firestoreUser.email);            
             const user = Usuario.fromFirebase(firestoreUser.nameuid,firestoreUser.nombre,firestoreUser.email)
+            this._user=user;
             console.log('user ',user)
+            console.log('_user ',this._user)
             this.store.dispatch( authActions.setUser( {user} ));
             
           })
       } else {
         console.log('else');
+        //this._user=null; // ojo excepcion null
         //this.userSubsccription.unsubscribe(); // CUIDADOOOO
         this.store.dispatch( authActions.unSetUser());        
       }
