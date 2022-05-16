@@ -1,8 +1,11 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
+
 import { Store } from '@ngrx/store';
+import { AppState } from '../app.reducer';
+import * as ingresoEgresoActons from '../ingreso-egreso/ingreso-egreso.actions'
+
 import { Subscription } from 'rxjs';
 import { filter } from 'rxjs/operators';
-import { AppState } from '../app.reducer';
 import { IngresoEgresoService } from '../services/ingreso-egreso.service';
 
 @Component({
@@ -14,6 +17,7 @@ import { IngresoEgresoService } from '../services/ingreso-egreso.service';
 export class DashboardComponent implements OnInit, OnDestroy {
 
   userSubs!: Subscription;
+  ingresosSubs!: Subscription;
 
   constructor( 
                 private store: Store<AppState>,
@@ -21,6 +25,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
               ) { }
 
   ngOnDestroy(): void {
+    this.ingresosSubs.unsubscribe();
     this.userSubs.unsubscribe();
   }
 
@@ -30,8 +35,11 @@ export class DashboardComponent implements OnInit, OnDestroy {
         filter( auth => auth.user != null ) // este pipe es sagrado, perite invalidar el estado inicial null ahorrando recurso 
       )
       .subscribe( ({user}) => {
-        console.log(user);
-        this.ingresoEgresoService.initIngresosEgresosListener(user?.uid)    
+        //console.log(user);
+        this.ingresosSubs = this.ingresoEgresoService.initIngresosEgresosListener(user?.uid) 
+          .subscribe( ingresosEgresosFB => 
+            this.store.dispatch( ingresoEgresoActons.setItems({ items: ingresosEgresosFB }))
+          );
       });
   }
 

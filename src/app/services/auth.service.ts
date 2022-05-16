@@ -6,6 +6,7 @@ import { AngularFirestore } from '@angular/fire/compat/firestore';
 import { Store } from '@ngrx/store';
 import { AppState } from '../app.reducer';
 import * as authActions from '../auth/auth.actions';
+import * as ingresoEgresoAction from '../ingreso-egreso/ingreso-egreso.actions'
 
 import { map, Subscription } from 'rxjs';
 import { Usuario } from '../models/usuario.model';
@@ -47,6 +48,7 @@ export class AuthService {
             console.log('user ',user)
             console.log('_user ',this._user)
             this.store.dispatch( authActions.setUser( {user} ));
+            this.store.dispatch(ingresoEgresoAction.unSetItems())
             
           })
       } else {

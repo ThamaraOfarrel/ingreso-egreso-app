@@ -18,6 +18,8 @@ export class IngresoEgresoService {
   crearIngresoEgreso( ingresoEgreso: IngresoEgreso )  {
     const uid: String = this.authService.user.uid ;
     console.log(`${uid}/ingresos-egresos`);
+
+    delete ingresoEgreso.uid;
     
     return this.firestore.doc(`${uid}/ingresos-egresos`)
       .collection('items')
@@ -25,11 +27,11 @@ export class IngresoEgresoService {
   }
 
   initIngresosEgresosListener( uid: string = '' ) {
-    this.firestore.collection(`${uid}/ingresos-egresos/items`)
+    return this.firestore.collection(`${uid}/ingresos-egresos/items`)
       .snapshotChanges() // el snapshotChanges()  es lo que retorna un observable 
       .pipe(
         map( snapshot => 
-            //console.log(snapshot);            
+            //console.log(snapshot);
             snapshot.map( doc => 
               //console.log('data ',doc.payload.doc.data());
               ({
@@ -38,8 +40,11 @@ export class IngresoEgresoService {
               })
             )            
           )
-      )
-      
-      .subscribe( algo => console.log(algo) );
+      )     
+  }
+
+  borrarIngresoEgreso( uidItem: String ){
+    const uid: String = this.authService.user.uid ;
+    return this.firestore.doc(`${uid}/ingresos-egresos/items/${uidItem}`).delete();
   }
 }

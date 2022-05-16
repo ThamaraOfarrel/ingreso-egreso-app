@@ -1,4 +1,5 @@
 export class IngresoEgreso {
+    uid: any;
 
     constructor(
         public descripcion  :  string, 
